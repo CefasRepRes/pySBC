@@ -50,7 +50,7 @@ for iY in range( YEAR_0, YEAR_1+1 ) :
 
         fname = "{0}/{2}_{1}.nc".format( directory, kV, iY )
         fname2 = "{0}/{2}_{1}.nsddsdsc".format( directory, kV, iY )
-        if not os.path.exists( fname2 ) :
+        if not (os.path.exists( fname2 ) or os.path.exists( fname )):
 
            server.retrieve( 
     'reanalysis-era5-single-levels',
@@ -92,6 +92,9 @@ for iY in range( YEAR_0, YEAR_1+1 ) :
         ]
     },
     '{0}'.format( fname ) )
+
+        else: 
+            print('Path exists: ' + fname)
 
 if LSM:
     # get land-sea mask
