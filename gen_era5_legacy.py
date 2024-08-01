@@ -12,17 +12,18 @@ __date__        = "2018-05"
 
 #====================== USR PARAMS ===========================
 
-Year_init    = 1979                                             ## First year to process          
-Year_end     = 1978                                             ## Last one [included]
+Year_init    = 2005                                             ## First year to process          
+Year_end     = 2005                                             ## Last one [included]
 East         =   19                                             ## East Border
 West         =  -28                                             ## West Border
 North        =   68                                             ## North Border
 South        =   38                                             ## South Border
-path_ERA5    = '/projectsa/NEMO/Forcing/ERA5/SURFACE_FORCING/'  ## ROOT PATH OD ERA5 DATA
-path_EXTRACT = '/projectsa/NEMO/ryapat/Extract' ## WHERE TO EXTRACT YOUR REGION
-path_FORCING = '/projectsa/NEMO/ryapat/Forcing' ## NEMO FORCING
-clean        = False                                            ## Clean extraction (longest bit)
+path_ERA5    = './Raw/ERA5/SURFACE_FORCING/'  ## ROOT PATH OD ERA5 DATA
+path_EXTRACT = './Extract_legacy/' ## WHERE TO EXTRACT YOUR REGION
+path_FORCING = './Forcing_legacy/' ## NEMO FORCING
+clean        = True                                            ## Clean extraction (longest bit)
 sph_ON       = True                                             ## Compute specific humidity or not
+sph_only     = False                                            ## Calculation only (all already clean)
 
 #================== NEMO DOCUMENTATION =======================
 
@@ -41,7 +42,6 @@ import datetime
 from   netCDF4 import Dataset, MFDataset
 import netcdftime
 import matplotlib.pyplot as plt
-from   matplotlib.mlab import griddata
 import scipy.spatial.qhull as qhull
 
 #====================== VARIABLE DEF =========================
@@ -211,21 +211,22 @@ def datetime_range(start, end, delta):
 #======================= CORE PROGR ==========================
 
 ## load NCO
-os.system( "module load nco/gcc/4.4.2.ncwa" )
+os.system( "module load nco/4.9.3/intel" )
 os.system( "mkdir {0} {1}".format( path_EXTRACT, path_FORCING ) )
 if West < 0 : West = 360.+West
 if East < 0 : East = 360.+East
 
 ## Loop over each variable
-for dirVar, nameVar in var_path.iteritems() :
-
+for dirVar, nameVar in var_path.items() :
+    if sph_only: 
+        break
     print ("================== {0} - {1} ==================".format( dirVar, nameVar ))
 
     ##---------- EXTRACT ALL DATA FOR DOMAIN ----------------
     for iY in range( Year_init, Year_end+1 ) :
         ## Files
         finput  = "{0}/{1}/{2}_{1}.nc".format( path_ERA5, dirVar, iY )
-        foutput = "./{2}/{0}_{1}.nc".format( nameVar, iY, path_EXTRACT )
+        foutput = "./{2}/{0}_y{1}.nc".format( nameVar, iY, path_EXTRACT )
         ## Extract the subdomain
         Extract( finput, foutput, clean=clean ) 
 
@@ -276,8 +277,10 @@ for dirVar, nameVar in var_path.iteritems() :
 if sph_ON : 
 
    for iY in range( Year_init, Year_end+1 ) :
+       print('Reading D2M and SP...')
        Time, Lon, Lat, d2m, dUnits, dName = Read_NetCDF( "./{1}/forSPH_ERA5_D2M_y{0}.nc".format( iY, path_FORCING ), 'D2M' )
        Time, Lon, Lat, sp , dUnits, dName = Read_NetCDF( "./{1}/forSPH_ERA5_SP_y{0}.nc" .format( iY, path_FORCING ), 'SP'  )
+       print('Calculating SPH...')
        esat = 611.21 * np.exp( 17.502 * (d2m-273.16) / (d2m-32.19) )
        dyrvap = 287.0597 / 461.5250
        dVar = dyrvap * esat / ( sp - (1-dyrvap) * esat)

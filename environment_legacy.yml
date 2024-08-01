@@ -1,0 +1,14 @@
+name: pysbc_leg
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - numpy
+  - dask
+  - xarray
+  - scipy
+  - netcdf4
+  - netcdftime
+  - ipython
