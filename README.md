@@ -1,3 +1,28 @@
+This forked repository contains updates for use on UEA HPC Ada. 
+
+For original development, please referred to this repository and wiki: 
+
+
+### How to create ERA5 forcing for NEMO? 
+
+The JMMP repositories provide links to ERA5 forcing for AMM7 and AMM15, e.g.: 
+
+
+To recreate the same forcing files for alternative years, can follow these steps: 
+1. Use `get_era5.py` to download the raw ERA5 data. 
+  1. The years of interest should be set within `config.py`. 
+  1. NB. This requires use of cdsapi. Refer here for installation instructions. 
+  1. Script extracts global data, so be aware of large file sizes. [Could be modified for future]
+  1. Use `sph_on = True` to ensure the files needed to calculate SPH are downloaded. 
+  1. To run as a batch job, see `extract_example_era5.sbatch` 
+
+1. Use gen_era5_legacy.py to process these files into required format (matching JMMP). 
+  1. To run as batch job, see `extract_legacy_era5.sbatch`
+  1. The years of interest should be set within `gen_era5_legacy.py`.
+  1. Within the same script, see logical options to subset (clean) data, or calculating SPH. 
+
+
+
 **31 Jan 24 - RDP**
 
 **This repository had issues with the time coordinates
